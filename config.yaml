@@ -1,0 +1,21 @@
+# Config file
+
+# configuration for switching sgready device with one or two Shelly devices
+shelly2sgready:
+  use_all_4_states: true      # if true also set shelly_optional_states
+
+  shelly_state_2_3:
+    ip: 192.168.xxx.xx          # required
+    port: 80                    # optional
+    relay: 0                    # optional
+    #username: admin             # optional
+    #password: geheim            # optional
+
+  # this shelly is optional; set use_all_4_states: false if second shelly is not used
+  shelly_optional_states:
+    ip: 192.168.xxx.xx          # required
+    port: 80                    # optional
+    relay: 0                    # optional
+    #username: admin             # optional
+    #password: geheim            # optional
+
