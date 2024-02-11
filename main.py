@@ -2,7 +2,7 @@ import logging
 import argparse
 import time
 import ShellyPy
-from shelly2sgready.config import load_config
+from waermepumpensteuerung.config import load_config
 from shelly2sgready.sgready import SGReadyControl, SGReadyStates
 
 from waermepumpensteuerung.controller_loop import ControllerLoop
