@@ -1,4 +1,5 @@
 from datetime import datetime, date
+
 import time
 
 from influxdb_client import WritePrecision, InfluxDBClient, Point
@@ -30,7 +31,8 @@ class ControllerLoop:
         error_count = 0
         while True:
             try:
-                self.logging.info("loop start")
+                production_limit = self.get_actual_production_limit()
+                self.logging.info(f"actual production limit = {production_limit}")
                 time.sleep(self.interval)
             except :
                 error_count += 1
@@ -39,3 +41,28 @@ class ControllerLoop:
                     # Give up after a while
                     raise
                 pass
+
+
+    def get_actual_production_limit(self) -> int:
+        actual_price = self.get_actual_electricity_price()
+        limit = 5000
+
+        if actual_price <= self.cfg.price_limit_extreme_low_price:
+            limit = self.cfg.production_limit_extreme_low_price
+        elif actual_price <= self.cfg.price_limit_low_price:
+            limit = self.cfg.production_limit_low_price
+        elif actual_price <= self.cfg.price_limit_normal_price:
+            limit = self.cfg.production_limit_normal_price
+        elif actual_price <= self.cfg.price_limit_high_price:
+            limit = self.cfg.production_limit_high_price
+        elif actual_price <= self.cfg.price_limit_extreme_high_price:
+            limit = self.cfg.production_limit_extreme_high_price
+
+        return limit
+
+
+
+
+    def get_actual_electricity_price(self) -> float:
+
+        return 0.36

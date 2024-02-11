@@ -23,6 +23,20 @@ shelly2sgready:
 heatpump:
   interval: 60                # optional
 
+  production_limit:
+    extreme_low_price: 500
+    low_price: 1000
+    normal_price: 2000
+    high_price: 3000
+    extreme_high_price: 4000
+
+  price_limit:
+    extreme_low_price: 0.20
+    low_price: 0.25
+    normal_price: 0.36
+    high_price: 0.40
+    extreme_high_price: 0.45
+
 # How to access InfluxDB
 influxdb:
   url:

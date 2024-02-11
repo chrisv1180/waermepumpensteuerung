@@ -22,6 +22,19 @@ class Config:
             self.influxdb_bucket_mr = bucket_mr or bucket
             self.influxdb_bucket_hr = bucket_hr or bucket
 
+            self.production_limit_extreme_low_price = data['heatpump']['production_limit'].get('extreme_low_price', 500)  # type: int
+            self.production_limit_low_price = data['heatpump']['production_limit'].get('low_price', 1000)  # type: int
+            self.production_limit_normal_price = data['heatpump']['production_limit'].get('normal_price', 2000)  # type: int
+            self.production_limit_high_price = data['heatpump']['production_limit'].get('high_price', 3000)  # type: int
+            self.production_limit_extreme_high_price = data['heatpump']['production_limit'].get('extreme_high_price', 4000)  # type: int
+
+            self.price_limit_extreme_low_price = data['heatpump']['price_limit'].get('extreme_low_price', 0.2)  # type: float
+            self.price_limit_low_price = data['heatpump']['price_limit'].get('low_price', 0.25)  # type: float
+            self.price_limit_normal_price = data['heatpump']['price_limit'].get('normal_price', 0.3)  # type: float
+            self.price_limit_high_price = data['heatpump']['price_limit'].get('high_price', 0.4)  # type: float
+            self.price_limit_extreme_high_price = data['heatpump']['price_limit'].get('extreme_high_price', 0.45)  # type: float
+
+
 
 
 
