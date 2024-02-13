@@ -48,7 +48,7 @@ def main():
             logging.info(waermepumpe.shelly_optional.relay(0))
             logging.info(waermepumpe.getState())
 
-            S = ControllerLoop(conf, logging)
+            S = ControllerLoop(conf, logging, waermepumpe)
 
             S.run()
         except Exception as e:
