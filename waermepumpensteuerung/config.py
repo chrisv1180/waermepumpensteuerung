@@ -28,11 +28,27 @@ class Config:
             self.production_limit_high_price = data['heatpump']['production_limit'].get('high_price', 3000)  # type: int
             self.production_limit_extreme_high_price = data['heatpump']['production_limit'].get('extreme_high_price', 4000)  # type: int
 
+            self.production_limit_small_extreme_low_price = data['heatpump']['production_limit_small'].get('extreme_low_price', 100)  # type: int
+            self.production_limit_small_low_price = data['heatpump']['production_limit_small'].get('low_price', 200)  # type: int
+            self.production_limit_small_normal_price = data['heatpump']['production_limit_small'].get('normal_price', 400)  # type: int
+            self.production_limit_small_high_price = data['heatpump']['production_limit_small'].get('high_price', 500)  # type: int
+            self.production_limit_small_extreme_high_price = data['heatpump']['production_limit_small'].get('extreme_high_price', 600)  # type: int
+
             self.price_limit_extreme_low_price = data['heatpump']['price_limit'].get('extreme_low_price', 0.2)  # type: float
             self.price_limit_low_price = data['heatpump']['price_limit'].get('low_price', 0.25)  # type: float
             self.price_limit_normal_price = data['heatpump']['price_limit'].get('normal_price', 0.3)  # type: float
             self.price_limit_high_price = data['heatpump']['price_limit'].get('high_price', 0.4)  # type: float
             self.price_limit_extreme_high_price = data['heatpump']['price_limit'].get('extreme_high_price', 0.45)  # type: float
+
+            self.use_small_as_limit = data['heatpump'].get('use_small_as_limit', False)  # type: bool
+
+            self.battery_soc_extreme_low_price = data['heatpump']['battery_soc_limit'].get('extreme_low_price', 10)  # type: int
+            self.battery_soc_low_price = data['heatpump']['battery_soc_limit'].get('low_price', 20)  # type: int
+            self.battery_soc_normal_price = data['heatpump']['battery_soc_limit'].get('normal_price', 25)  # type: int
+            self.battery_soc_high_price = data['heatpump']['battery_soc_limit'].get('high_price', 60)  # type: int
+            self.battery_soc_extreme_high_price = data['heatpump']['battery_soc_limit'].get('extreme_high_price', 100)  # type: int
+
+            self.consumption_limit = data['heatpump'].get('consumption_limit', 100)  # type: int
 
 
 

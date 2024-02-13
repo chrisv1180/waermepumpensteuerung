@@ -20,8 +20,9 @@ shelly2sgready:
     #password: geheim            # optional
 
 # heatpump specific settings
-heatpump:
-  interval: 60                # optional
+heatpump:                       # optional
+  interval: 60
+  use_small_as_limit: false
 
   production_limit:
     extreme_low_price: 500
@@ -30,12 +31,28 @@ heatpump:
     high_price: 3000
     extreme_high_price: 4000
 
+  production_limit_small:
+    extreme_low_price: 100
+    low_price: 200
+    normal_price: 400
+    high_price: 500
+    extreme_high_price: 600
+
   price_limit:
     extreme_low_price: 0.20
     low_price: 0.25
     normal_price: 0.36
     high_price: 0.40
     extreme_high_price: 0.45
+
+  consumption_limit: 100
+
+  battery_soc_limit:
+    extreme_low_price: 10
+    low_price: 20
+    normal_price: 25
+    high_price: 60
+    extreme_high_price: 100
 
 # How to access InfluxDB
 influxdb:
