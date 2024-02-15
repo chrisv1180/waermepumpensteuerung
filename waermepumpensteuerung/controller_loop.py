@@ -6,6 +6,7 @@ from influxdb_client import WritePrecision, InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from waermepumpensteuerung.config import Config
+from waermepumpensteuerung.simple_hysteresis import SimpleHysteresis
 
 class ControllerLoop:
 
@@ -26,6 +27,9 @@ class ControllerLoop:
 
         # Used to track the transition to the next day for daily measurements
         self.todays_date = date.today()
+
+        self.hyst_battery = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(), lower_bound=self.get_actual_battery_soc_limit() - 10)
+        self.hyst_consumption = SimpleHysteresis(upper_bound=self.get_actual_consumption_limit(), lower_bound=self.get_actual_production_limit() - 100, direction='down')
 
 
     def run(self):
