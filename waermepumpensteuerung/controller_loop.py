@@ -65,10 +65,10 @@ class ControllerLoop:
         self.logging.info(f"{self.waermepumpe.getState()}")
 
         if (self.hyst_consumption.test(value=actual_consumption,
-                                      upper_bound=self.get_actual_consumption_limit() + self.conf.consumption_hysteresis,
-                                      lower_bound=self.get_actual_consumption_limit()) and
-                self.hyst_battery.test(value=actual_battery_soc, upper_bound=self.get_actual_battery_soc_limit(),
-                                       lower_bound=self.get_actual_battery_soc_limit() - self.conf.battery_hysteresis) and
+                                      upper_bound=consumption_limit + self.conf.consumption_hysteresis,
+                                      lower_bound=consumption_limit) and
+                self.hyst_battery.test(value=actual_battery_soc, upper_bound=battery_soc_limit,
+                                       lower_bound=battery_soc_limit - self.conf.battery_hysteresis) and
                 actual_production >= production_limit):
             self.logging.info(f"new state Go")
         else:
