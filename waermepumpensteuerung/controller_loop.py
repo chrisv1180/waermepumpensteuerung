@@ -28,8 +28,8 @@ class ControllerLoop:
         # Used to track the transition to the next day for daily measurements
         self.todays_date = date.today()
 
-        self.hyst_battery = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(), lower_bound=self.get_actual_battery_soc_limit() - 10)
-        self.hyst_consumption = SimpleHysteresis(upper_bound=self.get_actual_consumption_limit(), lower_bound=self.get_actual_production_limit() - 100, direction='down')
+        self.hyst_battery = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(), lower_bound=self.get_actual_battery_soc_limit() - self.conf.battery_hysteresis)
+        self.hyst_consumption = SimpleHysteresis(upper_bound=self.get_actual_consumption_limit() + self.conf.consumption_hysteresis, lower_bound=self.get_actual_consumption_limit(), direction='down')
 
 
     def run(self):
@@ -64,7 +64,12 @@ class ControllerLoop:
 
         self.logging.info(f"{self.waermepumpe.getState()}")
 
-        if actual_consumption <= consumption_limit and actual_battery_soc >= battery_soc_limit and actual_production >= production_limit:
+        if (self.hyst_consumption.test(value=actual_consumption,
+                                      upper_bound=self.get_actual_consumption_limit() + self.conf.consumption_hysteresis,
+                                      lower_bound=self.get_actual_consumption_limit()) and
+                self.hyst_battery.test(value=actual_battery_soc, upper_bound=self.get_actual_battery_soc_limit(),
+                                       lower_bound=self.get_actual_battery_soc_limit() - self.conf.battery_hysteresis) and
+                actual_production >= production_limit):
             self.logging.info(f"new state Go")
         else:
             self.logging.info(f"new state Normal")

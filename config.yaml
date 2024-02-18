@@ -46,6 +46,7 @@ heatpump:                       # optional
     extreme_high_price: 0.45
 
   consumption_limit: 100
+  consumption_hysteresis: 100
 
   battery_soc_limit:
     extreme_low_price: 10
@@ -53,6 +54,7 @@ heatpump:                       # optional
     normal_price: 25
     high_price: 60
     extreme_high_price: 100
+    hysteresis: 10
 
 # How to access InfluxDB
 influxdb:
