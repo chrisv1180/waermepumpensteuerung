@@ -54,21 +54,26 @@ class SimpleHysteresis(object):
         return not self._hysteresis_lower_than_lowerbound_pos(value=value, upper_bound=upper_bound,
                                                               lower_bound=lower_bound)
 
-    def test(self, value: float):
+    def test(self, value: float, upper_bound: float = None, lower_bound: float = None):
+
+        if upper_bound is None:
+            upper_bound = self.upper_bound
+        if lower_bound is None:
+            lower_bound = self.lower_bound
 
         if self.direction == Directions.up.value:
             if self.flavor == Flavors.positive.value:
-                answer = self._hysteresis_bigger_than_upperbound_pos(value=value, upper_bound=self.upper_bound,
-                                                            lower_bound=self.lower_bound)
+                answer = self._hysteresis_bigger_than_upperbound_pos(value=value, upper_bound=upper_bound,
+                                                            lower_bound=lower_bound)
             else:
-                answer = self._hysteresis_bigger_than_upperbound_neg(value=value, upper_bound=self.upper_bound,
-                                                            lower_bound=self.lower_bound)
+                answer = self._hysteresis_bigger_than_upperbound_neg(value=value, upper_bound=upper_bound,
+                                                            lower_bound=lower_bound)
         else:
             if self.flavor == Flavors.positive.value:
-                answer = self._hysteresis_lower_than_lowerbound_pos(value=value, upper_bound=self.upper_bound,
-                                                           lower_bound=self.lower_bound)
+                answer = self._hysteresis_lower_than_lowerbound_pos(value=value, upper_bound=upper_bound,
+                                                           lower_bound=lower_bound)
             else:
-                answer = self._hysteresis_lower_than_lowerbound_neg(value=value, upper_bound=self.upper_bound,
-                                                           lower_bound=self.lower_bound)
+                answer = self._hysteresis_lower_than_lowerbound_neg(value=value, upper_bound=upper_bound,
+                                                           lower_bound=lower_bound)
 
         return answer
