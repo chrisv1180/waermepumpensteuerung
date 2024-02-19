@@ -52,6 +52,8 @@ class Config:
             self.consumption_limit = data['heatpump'].get('consumption_limit', 100)  # type: int
             self.consumption_hysteresis = data['heatpump'].get('consumption_hysteresis', 100)  # type: int
 
+            self.test_mode = data['heatpump'].get('testmode', False)  # type: bool
+
 
 
 

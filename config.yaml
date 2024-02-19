@@ -21,6 +21,7 @@ shelly2sgready:
 
 # heatpump specific settings
 heatpump:                       # optional
+  testmode: true
   interval: 60
   use_small_as_limit: false
 

@@ -7,6 +7,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 from waermepumpensteuerung.config import Config
 from waermepumpensteuerung.simple_hysteresis import SimpleHysteresis
+from waermepumpensteuerung.test_helper import load_testhelper
 
 class ControllerLoop:
 
@@ -117,18 +118,38 @@ class ControllerLoop:
 
 
     def get_actual_electricity_price(self) -> float:
+        ret_val = 0.36
+        if self.conf.test_mode:
+            testhelper = load_testhelper("./test_values.yaml")
+            ret_val = testhelper.price_actual
+            testhelper = None
 
-        return 0.36
+        return ret_val
 
     def get_actual_consumption(self) -> int:
+        ret_val = 80
+        if self.conf.test_mode:
+            testhelper = load_testhelper("./test_values.yaml")
+            ret_val = testhelper.consumption_actual
+            testhelper = None
 
-        return 80
+        return ret_val
 
     def get_actual_battery_soc(self) -> int:
+        ret_val = 39
+        if self.conf.test_mode:
+            testhelper = load_testhelper("./test_values.yaml")
+            ret_val = testhelper.battery_soc_actual
+            testhelper = None
 
-        return 39
+        return ret_val
 
     def get_actual_production(self) -> int:
+        ret_val = 412
+        if self.conf.test_mode:
+            testhelper = load_testhelper("./test_values.yaml")
+            ret_val = testhelper.production_actual
+            testhelper = None
 
-        return 412
+        return ret_val
 
