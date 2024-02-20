@@ -49,8 +49,12 @@ class Config:
             self.battery_soc_extreme_high_price = data['heatpump']['battery_soc_limit'].get('extreme_high_price', 100)  # type: int
             self.battery_hysteresis = data['heatpump']['battery_soc_limit'].get('hysteresis', 10)  # type: int
 
-            self.consumption_limit = data['heatpump'].get('consumption_limit', 100)  # type: int
-            self.consumption_hysteresis = data['heatpump'].get('consumption_hysteresis', 100)  # type: int
+            self.consumption_limit_extreme_low_price = data['heatpump']['consumption_limit'].get('extreme_low_price', 300)  # type: int
+            self.consumption_limit_low_price = data['heatpump']['consumption_limit'].get('low_price', 200)  # type: int
+            self.consumption_limit_normal_price = data['heatpump']['consumption_limit'].get('normal_price', 100)  # type: int
+            self.consumption_limit_high_price = data['heatpump']['consumption_limit'].get('high_price', 50)  # type: int
+            self.consumption_limit_extreme_high_price = data['heatpump']['consumption_limit'].get('extreme_high_price', 10)  # type: int
+            self.consumption_hysteresis = data['heatpump']['consumption_limit'].get('hysteresis', 100)  # type: int
 
             self.test_mode = data['heatpump'].get('testmode', False)  # type: bool
 

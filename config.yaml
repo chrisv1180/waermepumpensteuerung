@@ -31,6 +31,7 @@ heatpump:                       # optional
     normal_price: 2000
     high_price: 3000
     extreme_high_price: 4000
+    hysteresis: 500
 
   production_limit_small:
     extreme_low_price: 100
@@ -38,6 +39,7 @@ heatpump:                       # optional
     normal_price: 400
     high_price: 500
     extreme_high_price: 600
+    hysteresis: 50
 
   price_limit:
     extreme_low_price: 0.20
@@ -46,8 +48,13 @@ heatpump:                       # optional
     high_price: 0.40
     extreme_high_price: 0.45
 
-  consumption_limit: 100
-  consumption_hysteresis: 100
+  consumption_limit:
+    extreme_low_price: 300
+    low_price: 200
+    normal_price: 100
+    high_price: 50
+    extreme_high_price: 10
+    hysteresis: 100
 
   battery_soc_limit:
     extreme_low_price: 10

@@ -51,6 +51,7 @@ class ControllerLoop:
         production_limit = self.get_actual_production_limit()
         battery_soc_limit = self.get_actual_battery_soc_limit()
         consumption_limit = self.get_actual_consumption_limit()
+        self.logging.info(f"actual price = {self.get_actual_electricity_price()}")
         self.logging.info(f"actual production limit = {production_limit}")
         self.logging.info(f"actual battery_soc limit = {battery_soc_limit}")
         self.logging.info(f"actual consumption limit = {consumption_limit}")
@@ -113,8 +114,21 @@ class ControllerLoop:
         return soc
 
     def get_actual_consumption_limit(self) -> int:
+        actual_price = self.get_actual_electricity_price()
+        limit = 5
 
-        return self.conf.consumption_limit
+        if actual_price <= self.conf.price_limit_extreme_low_price:
+            limit = self.conf.consumption_limit_extreme_low_price
+        elif actual_price <= self.conf.price_limit_low_price:
+            limit = self.conf.consumption_limit_low_price
+        elif actual_price <= self.conf.price_limit_normal_price:
+            limit = self.conf.consumption_limit_normal_price
+        elif actual_price <= self.conf.price_limit_high_price:
+            limit = self.conf.consumption_limit_high_price
+        elif actual_price <= self.conf.price_limit_extreme_high_price:
+            limit = self.conf.consumption_limit_extreme_high_price
+
+        return limit
 
 
     def get_actual_electricity_price(self) -> float:
