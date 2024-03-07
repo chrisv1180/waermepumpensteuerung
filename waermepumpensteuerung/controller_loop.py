@@ -51,12 +51,14 @@ class ControllerLoop:
         production_limit = self.get_actual_production_limit()
         battery_soc_limit = self.get_actual_battery_soc_limit()
         consumption_limit = self.get_actual_consumption_limit()
+        battery_state = self.get_actual_battery_state()
         self.logging.info(f"actual price = {self.get_actual_electricity_price()}")
         self.logging.info(f"actual production limit = {production_limit}")
         self.logging.info(f"actual battery_soc limit = {battery_soc_limit}")
         self.logging.info(f"actual consumption limit = {consumption_limit}")
+        self.logging.info(f"actual battery state = {battery_state}")
         self.logging.info(f"last battery soc = {self._get_battery_soc_from_db()}")
-        self.logging.info(f"consumption last 5 minutes = {self._get_consumption_from_db()}")
+        self.logging.info(f"consumption last 3 minutes = {self._get_consumption_from_db()}")
 
 
         actual_production = self.get_actual_production()
@@ -173,11 +175,21 @@ class ControllerLoop:
 
         return ret_val
 
+    def get_actual_battery_state(self) -> str:
+        ret_val = "standby"
+        state = self._get_battery_state_from_db()
+        if state == 12:
+            ret_val = "laden"
+        elif state == 13:
+            ret_val = "entladen"
+
+        return ret_val
+
     def _get_battery_soc_from_db(self) -> int:
 
         query = f"""
         from(bucket: "{self.conf.influxdb_bucket_hr}")
-            |> range(start: -10m)
+            |> range(start: -5m)
             |> filter(fn: (r) => r["measurement-type"] == "battery")
             |> filter(fn: (r) => r["_field"] == "percentFull")
             |> last()
@@ -191,15 +203,33 @@ class ControllerLoop:
                     soc = record.get_value()
         return soc
 
+    def _get_battery_state_from_db(self) -> int:
+
+        query = f"""
+        from(bucket: "{self.conf.influxdb_bucket_hr}")
+            |> range(start: -5m)
+            |> filter(fn: (r) => r["measurement-type"] == "battery")
+            |> filter(fn: (r) => r["_field"] == "led_status")
+            |> last()
+        """
+        result = self.influxdb_query_api.query(query=query)
+        state = 0
+        for table in result:
+            for record in table.records:
+                measurement_type = record['measurement-type']
+                if measurement_type == "battery":
+                    state = record.get_value()
+        return state
+
     def _get_consumption_from_db(self) -> float:
 
         query = f"""
         from(bucket: "vzlogger")
-          |> range(start: -10m)
+          |> range(start: -3m)
           |> filter(fn: (r) => r["_measurement"] == "vz_measurement")
           |> filter(fn: (r) => r["_field"] == "value")
           |> filter(fn: (r) => r["measurement"] == "leistung")
-          |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)
+          |> aggregateWindow(every: 3m, fn: mean, createEmpty: false)
           |> yield(name: "mean")
         """
         result = self.influxdb_query_api.query(query=query)
