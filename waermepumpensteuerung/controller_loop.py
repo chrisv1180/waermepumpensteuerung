@@ -57,10 +57,6 @@ class ControllerLoop:
         self.logging.info(f"actual battery_soc limit = {battery_soc_limit}")
         self.logging.info(f"actual consumption limit = {consumption_limit}")
         self.logging.info(f"actual battery state = {battery_state}")
-        self.logging.info(f"last battery soc = {self._get_battery_soc_from_db()}")
-        self.logging.info(f"mean consumption last 3 minutes = {self._get_consumption_from_db()}")
-        self.logging.info(f"mean production balkon last 3 minutes = {self._get_production_balkon_from_db()}")
-        self.logging.info(f"mean production dach last 3 minutes = {self._get_production_dach_from_db()}")
 
 
         actual_production = self.get_actual_production()
@@ -69,6 +65,11 @@ class ControllerLoop:
         self.logging.info(f"actual production = {actual_production}")
         self.logging.info(f"actual battery_soc = {actual_battery_soc}")
         self.logging.info(f"actual consumption = {actual_consumption}")
+        self.logging.info(f"used for consumption: {'balkon' if self.conf.use_small_as_limit else 'dach'}")
+        # self.logging.info(f"last battery soc = {self._get_battery_soc_from_db()}")
+        # self.logging.info(f"mean consumption last 3 minutes = {self._get_consumption_from_db()}")
+        # self.logging.info(f"mean production balkon last 3 minutes = {self._get_production_balkon_from_db()}")
+        # self.logging.info(f"mean production dach last 3 minutes = {self._get_production_dach_from_db()}")
 
         self.logging.info(f"{self.waermepumpe.getState()}")
 
