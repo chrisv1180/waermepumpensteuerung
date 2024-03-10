@@ -58,7 +58,9 @@ class ControllerLoop:
         self.logging.info(f"actual consumption limit = {consumption_limit}")
         self.logging.info(f"actual battery state = {battery_state}")
         self.logging.info(f"last battery soc = {self._get_battery_soc_from_db()}")
-        self.logging.info(f"consumption last 3 minutes = {self._get_consumption_from_db()}")
+        self.logging.info(f"mean consumption last 3 minutes = {self._get_consumption_from_db()}")
+        self.logging.info(f"mean production balkon last 3 minutes = {self._get_production_balkon_from_db()}")
+        self.logging.info(f"mean production dach last 3 minutes = {self._get_production_dach_from_db()}")
 
 
         actual_production = self.get_actual_production()
@@ -172,6 +174,8 @@ class ControllerLoop:
             testhelper = load_testhelper("./test_values.yaml")
             ret_val = testhelper.production_actual
             testhelper = None
+        else:
+            ret_val = self._get_production_balkon_from_db() if self.conf.use_small_as_limit else self._get_production_dach_from_db()
 
         return ret_val
 
@@ -240,3 +244,46 @@ class ControllerLoop:
                 if measurement_type == "leistung":
                     consumption = record.get_value()
         return consumption
+
+    def _get_production_balkon_from_db(self) -> float:
+
+        query = f"""
+        from(bucket: "balkonkraftwerk")
+          |> range(start: -3m)
+          |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+          |> filter(fn: (r) => r["topic"] == "inverter/HM-800/ch0/P_AC")
+          |> filter(fn: (r) => r["_field"] == "value")
+          |> aggregateWindow(every: 3m, fn: mean, createEmpty: false)
+          |> yield(name: "mean")
+        """
+        result = self.influxdb_query_api.query(query=query)
+        production = 0
+        for table in result:
+            for record in table.records:
+                measurement_type = record['_measurement']
+                if measurement_type == "mqtt_consumer":
+                    production = record.get_value()
+        return production
+
+    def _get_production_dach_from_db(self) -> float:
+
+        query = f"""
+        from(bucket: "envoy_high")
+          |> range(start: -3m)
+          |> filter(fn: (r) => r["source"] == "power-meter")
+          |> filter(fn: (r) => r["measurement-type"] == "production")
+          |> filter(fn: (r) => r["_field"] == "P")
+          |> aggregateWindow(every: 3m, fn: mean, createEmpty: false)
+          |> group(columns: ["_time"], mode:"by")
+          |> sum(column: "_value")
+          |> group()
+          |> yield(name: "mean_dach")
+        """
+        result = self.influxdb_query_api.query(query=query)
+        production = 0
+        for table in result:
+            for record in table.records:
+                measurement_type = record['result']
+                if measurement_type == "mean_dach":
+                    production = record.get_value()
+        return production
