@@ -1,0 +1,6 @@
+# ATTENTION: Change this file with an external text editor NOT with PyCharm
+heatpump_test:
+  consumption_actual: 6000
+  production_actual: 200
+  battery_soc_actual: 80
+  price_actual: 0.36
