@@ -4,6 +4,7 @@ import time
 
 from influxdb_client import WritePrecision, InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+from shelly2sgready.sgready import SGReadyStates, SGReadyControl
 
 from waermepumpensteuerung.config import Config
 from waermepumpensteuerung.simple_hysteresis import SimpleHysteresis
@@ -11,7 +12,7 @@ from waermepumpensteuerung.test_helper import load_testhelper
 
 class ControllerLoop:
 
-    def __init__(self, cfg: Config, logging, waermepumpe) -> None:
+    def __init__(self, cfg: Config, logging, waermepumpe: SGReadyControl) -> None:
         self.logging = logging
         self.conf = cfg
         self.waermepumpe = waermepumpe
@@ -71,7 +72,6 @@ class ControllerLoop:
         # self.logging.info(f"mean production balkon last 3 minutes = {self._get_production_balkon_from_db()}")
         # self.logging.info(f"mean production dach last 3 minutes = {self._get_production_dach_from_db()}")
 
-        self.logging.info(f"{self.waermepumpe.getState()}")
 
         if (self.hyst_consumption.test(value=actual_consumption,
                                       upper_bound=consumption_limit + self.conf.consumption_hysteresis,
@@ -79,9 +79,11 @@ class ControllerLoop:
                 self.hyst_battery.test(value=actual_battery_soc, upper_bound=battery_soc_limit,
                                        lower_bound=battery_soc_limit - self.conf.battery_hysteresis) and
                 actual_production >= production_limit):
-            self.logging.info(f"new state Go")
+            # new state Go
+            self.set_heatpump_state(SGReadyStates.state3_go)
         else:
-            self.logging.info(f"new state Normal")
+            # new state Normal
+            self.set_heatpump_state(SGReadyStates.state2_normal)
 
 
 
@@ -288,3 +290,11 @@ class ControllerLoop:
                 if measurement_type == "mean_dach":
                     production = record.get_value()
         return production
+
+    def set_heatpump_state(self, new_state: SGReadyStates):
+        actual_state = self.waermepumpe.getState()
+        self.logging.info(f"actual state: {actual_state}")
+        self.logging.info(f"new state: {new_state}")
+
+        if not self.conf.test_mode and actual_state != new_state:
+            self.waermepumpe.setState(new_state)
