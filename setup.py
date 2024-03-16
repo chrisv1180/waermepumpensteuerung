@@ -14,7 +14,7 @@ if not version:
     raise RuntimeError('version is not set')
 
 long_description = ""
-with open("readme.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
