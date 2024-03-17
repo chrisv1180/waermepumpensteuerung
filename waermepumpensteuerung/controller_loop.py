@@ -30,8 +30,16 @@ class ControllerLoop:
         # Used to track the transition to the next day for daily measurements
         self.todays_date = date.today()
 
-        self.hyst_battery = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(), lower_bound=self.get_actual_battery_soc_limit() - self.conf.battery_hysteresis)
-        self.hyst_consumption = SimpleHysteresis(upper_bound=self.get_actual_consumption_limit() + self.conf.consumption_hysteresis, lower_bound=self.get_actual_consumption_limit(), direction='down')
+        actual_price = self.get_actual_electricity_price()
+        self.hyst_battery = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(actual_price), lower_bound=self.get_actual_battery_soc_limit(actual_price) - self.conf.battery_hysteresis)
+        self.hyst_consumption = SimpleHysteresis(upper_bound=self.get_actual_consumption_limit(actual_price) + self.conf.consumption_hysteresis, lower_bound=self.get_actual_consumption_limit(actual_price), direction='down')
+
+        self.hyst_battery_high = SimpleHysteresis(upper_bound=self.get_actual_battery_soc_limit(actual_price + self.conf.price_limit_force_state_dif),
+                                             lower_bound=self.get_actual_battery_soc_limit(
+                                                 actual_price + self.conf.price_limit_force_state_dif) - self.conf.battery_hysteresis)
+        self.hyst_consumption_high = SimpleHysteresis(
+            upper_bound=self.get_actual_consumption_limit(actual_price + self.conf.price_limit_force_state_dif) + self.conf.consumption_hysteresis,
+            lower_bound=self.get_actual_consumption_limit(actual_price + self.conf.price_limit_force_state_dif), direction='down')
 
 
     def run(self):
@@ -49,11 +57,12 @@ class ControllerLoop:
                 pass
 
     def controller(self):
-        production_limit = self.get_actual_production_limit()
-        battery_soc_limit = self.get_actual_battery_soc_limit()
-        consumption_limit = self.get_actual_consumption_limit()
+        actual_price = self.get_actual_electricity_price()
+        production_limit = self.get_actual_production_limit(actual_price)
+        battery_soc_limit = self.get_actual_battery_soc_limit(actual_price)
+        consumption_limit = self.get_actual_consumption_limit(actual_price)
         battery_state = self.get_actual_battery_state()
-        self.logging.info(f"actual price = {self.get_actual_electricity_price()}")
+        self.logging.info(f"actual price = {actual_price}")
         self.logging.info(f"actual production limit = {production_limit}")
         self.logging.info(f"actual battery_soc limit = {battery_soc_limit}")
         self.logging.info(f"actual consumption limit = {consumption_limit}")
@@ -79,16 +88,20 @@ class ControllerLoop:
                 self.hyst_battery.test(value=actual_battery_soc, upper_bound=battery_soc_limit,
                                        lower_bound=battery_soc_limit - self.conf.battery_hysteresis) and
                 actual_production >= production_limit):
-            # new state Go
-            self.set_heatpump_state(SGReadyStates.state3_go)
+
+            if self.is_enough_for_force(actual_price=actual_price, actual_consumption=actual_consumption, actual_battery_soc=actual_battery_soc, actual_production=actual_production):
+                # new state Force
+                self.set_heatpump_state(SGReadyStates.state4_force)
+            else:
+                # new state Go
+                self.set_heatpump_state(SGReadyStates.state3_go)
         else:
             # new state Normal
             self.set_heatpump_state(SGReadyStates.state2_normal)
 
 
 
-    def get_actual_production_limit(self) -> int:
-        actual_price = self.get_actual_electricity_price()
+    def get_actual_production_limit(self, actual_price) -> int:
         limit = 5000
 
         if actual_price <= self.conf.price_limit_extreme_low_price:
@@ -105,8 +118,7 @@ class ControllerLoop:
         return limit
 
 
-    def get_actual_battery_soc_limit(self) -> int:
-        actual_price = self.get_actual_electricity_price()
+    def get_actual_battery_soc_limit(self, actual_price) -> int:
         soc = 100
 
         if actual_price <= self.conf.price_limit_extreme_low_price:
@@ -122,8 +134,7 @@ class ControllerLoop:
 
         return soc
 
-    def get_actual_consumption_limit(self) -> int:
-        actual_price = self.get_actual_electricity_price()
+    def get_actual_consumption_limit(self, actual_price) -> int:
         limit = 5
 
         if actual_price <= self.conf.price_limit_extreme_low_price:
@@ -298,3 +309,21 @@ class ControllerLoop:
 
         if not self.conf.test_mode and actual_state != new_state:
             self.waermepumpe.setState(new_state)
+
+    def is_enough_for_force(self, actual_price, actual_consumption, actual_battery_soc, actual_production) -> bool:
+        ret_val = False
+
+        consumption_limit_high = self.get_actual_consumption_limit(actual_price + self.conf.price_limit_force_state_dif)
+        battery_soc_limit_high = self.get_actual_battery_soc_limit(actual_price + self.conf.price_limit_force_state_dif)
+        production_limit_high = self.get_actual_production_limit(actual_price + self.conf.price_limit_force_state_dif)
+
+        if (self.hyst_consumption_high.test(value=actual_consumption,
+                                       upper_bound=consumption_limit_high + self.conf.consumption_hysteresis,
+                                       lower_bound=consumption_limit_high) and
+                self.hyst_battery_high.test(value=actual_battery_soc, upper_bound=battery_soc_limit_high,
+                                       lower_bound=battery_soc_limit_high - self.conf.battery_hysteresis) and
+                actual_production >= production_limit_high):
+            ret_val = True
+
+
+        return ret_val

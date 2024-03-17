@@ -62,6 +62,7 @@ heatpump:                       # optional
     normal_price: 0.36
     high_price: 0.40
     extreme_high_price: 0.45
+    force_state_dif: 0.02
 
   consumption_limit:
     extreme_low_price: 300
