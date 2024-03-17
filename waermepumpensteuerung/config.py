@@ -39,6 +39,7 @@ class Config:
             self.price_limit_normal_price = data['heatpump']['price_limit'].get('normal_price', 0.3)  # type: float
             self.price_limit_high_price = data['heatpump']['price_limit'].get('high_price', 0.4)  # type: float
             self.price_limit_extreme_high_price = data['heatpump']['price_limit'].get('extreme_high_price', 0.45)  # type: float
+            self.price_limit_force_state_dif = data['heatpump']['price_limit'].get('force_state_dif', 0.06)  # type: float
 
             self.use_small_as_limit = data['heatpump'].get('use_small_as_limit', False)  # type: bool
 
